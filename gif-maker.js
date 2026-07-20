@@ -30,6 +30,18 @@ const mapEl = document.getElementById('map');
 
 // Toggle GIF Mode function
 function toggleGifMode() {
+    if (window.innerWidth <= 768) {
+        // On mobile, skip the drawing box and just capture the entire visible map
+        selBox = {
+            left: 0,
+            top: 0,
+            width: mapEl.clientWidth,
+            height: mapEl.clientHeight
+        };
+        generateGif();
+        return;
+    }
+
     isGifMode = !isGifMode;
     if (isGifMode) {
         gifOverlay.style.display = 'block';
@@ -100,7 +112,9 @@ gifOverlay.addEventListener('mouseup', () => {
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
 // Generate GIF
-gifSaveBtn.addEventListener('click', async () => {
+gifSaveBtn.addEventListener('click', generateGif);
+
+async function generateGif() {
     gifOverlay.style.display = 'none';
     gifLoading.style.display = 'flex';
     gifProgress.style.width = '0%';
@@ -185,4 +199,4 @@ gifSaveBtn.addEventListener('click', async () => {
         }
         gifLoading.style.display = 'none';
     });
-});
+}
