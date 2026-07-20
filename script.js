@@ -1,7 +1,7 @@
 // Map Initialization
 const map = L.map('map', {
     zoomControl: false // Move zoom control if needed
-}).setView([38.5, -96], 5); // Center on CONUS
+}).setView([43.0731, -89.4012], 6); // Center on Madison, WI
 
 // Add base map (OpenStreetMap with custom dark mode filter in CSS)
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
