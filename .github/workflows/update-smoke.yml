@@ -1,0 +1,37 @@
+name: Update HRRR Smoke Data
+
+on:
+  schedule:
+    # Runs at 03:30, 09:30, 15:30, and 21:30 UTC
+    - cron: '30 3,9,15,21 * * *'
+  workflow_dispatch: # Allows you to manually click "Run" in the GitHub UI
+
+permissions:
+  contents: write # Allows the action to commit files back to the repo
+
+jobs:
+  fetch_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run fetch script
+        run: python3 fetch_data.py
+        
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          keep_files: false
+          commit_message: "Automated data update from HRRR model"
