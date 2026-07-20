@@ -17,26 +17,36 @@
 </head>
 <body>
     <div id="app-container">
-        <header class="glass-panel">
-            <h1>HRRR Smoke Forecast</h1>
-            <p class="subtitle">High-Resolution Rapid Refresh Model</p>
-        </header>
+        <button id="mobile-menu-btn" class="glass-panel btn-icon" aria-label="Open Menu">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
 
-        <div id="cams-panel" class="glass-panel">
-            <h3>Madison Air Quality Breakdown</h3>
-            <p class="subtitle">Copernicus (CAMS) Global Model</p>
-            <div class="cams-stats">
-                <div class="stat-box">
-                    <span class="stat-label">Total AQI</span>
-                    <span id="cams-aqi" class="stat-value">--</span>
-                </div>
-                <div class="stat-box">
-                    <span class="stat-label">PM2.5</span>
-                    <span id="cams-pm25" class="stat-value">--</span>
-                </div>
-                <div class="stat-box">
-                    <span class="stat-label">Ozone</span>
-                    <span id="cams-ozone" class="stat-value">--</span>
+        <div id="info-panel">
+            <button id="close-menu-btn" class="btn-icon" aria-label="Close Menu">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+
+            <header class="glass-panel">
+                <h1>HRRR Smoke Forecast</h1>
+                <p class="subtitle">High-Resolution Rapid Refresh Model</p>
+            </header>
+
+            <div id="cams-panel" class="glass-panel">
+                <h3>Madison Air Quality Breakdown</h3>
+                <p class="subtitle">Copernicus (CAMS) Global Model</p>
+                <div class="cams-stats">
+                    <div class="stat-box">
+                        <span class="stat-label">Total AQI</span>
+                        <span id="cams-aqi" class="stat-value">--</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">PM2.5</span>
+                        <span id="cams-pm25" class="stat-value">--</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">Ozone</span>
+                        <span id="cams-ozone" class="stat-value">--</span>
+                    </div>
                 </div>
             </div>
         </div>

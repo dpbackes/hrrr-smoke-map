@@ -10,7 +10,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 L.control.zoom({
-    position: 'topright'
+    position: 'bottomright'
 }).addTo(map);
 
 // App State
@@ -33,6 +33,18 @@ const modelRunEl = document.getElementById('model-run');
 const camsAqiEl = document.getElementById('cams-aqi');
 const camsPm25El = document.getElementById('cams-pm25');
 const camsOzoneEl = document.getElementById('cams-ozone');
+const infoPanel = document.getElementById('info-panel');
+const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+const closeMenuBtn = document.getElementById('close-menu-btn');
+
+// Mobile Menu Toggle
+mobileMenuBtn.addEventListener('click', () => {
+    infoPanel.classList.add('open');
+});
+
+closeMenuBtn.addEventListener('click', () => {
+    infoPanel.classList.remove('open');
+});
 
 // Fetch CAMS data for Madison
 async function loadCamsData() {
