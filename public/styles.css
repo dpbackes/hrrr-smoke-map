@@ -1,0 +1,204 @@
+:root {
+    --bg-color: #0f111a;
+    --text-primary: #f0f0f5;
+    --text-secondary: #a0a5b5;
+    --accent-color: #f75c03;
+    --glass-bg: rgba(25, 28, 41, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    overflow: hidden;
+}
+
+#app-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+}
+
+#map {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* Glassmorphism utility */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    box-shadow: var(--glass-shadow);
+}
+
+header.glass-panel {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    padding: 16px 24px;
+    min-width: 280px;
+}
+
+header h1 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+header .subtitle {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 300;
+}
+
+#controls {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    width: 90%;
+    max-width: 600px;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.badge {
+    background: var(--accent-color);
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.btn-icon {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-icon:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.btn-icon:active {
+    transform: scale(0.95);
+}
+
+input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    background: transparent;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    cursor: pointer;
+    margin-top: -8px;
+    box-shadow: 0 0 10px rgba(247, 92, 3, 0.5);
+    transition: transform 0.1s;
+}
+
+input[type=range]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+}
+
+.legend {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.legend-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.color-bar {
+    flex-grow: 1;
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(to right, 
+        #00e400 16%, 
+        #ffff00 16% 33%, 
+        #ff7e00 33% 50%, 
+        #ff0000 50% 66%, 
+        #8f3f97 66% 83%, 
+        #7e0023 83%
+    );
+}
+
+.metadata-info {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    text-align: right;
+    margin-top: -8px;
+}
+
+/* Customizing Leaflet for dark mode */
+.leaflet-container {
+    background-color: var(--bg-color);
+}
+/* Invert tiles to make a dark map, but keep hue for colors */
+.leaflet-layer,
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out,
+.leaflet-control-attribution {
+    filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+}

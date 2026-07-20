@@ -1,0 +1,8 @@
+herbie-data
+xarray
+zarr
+s3fs
+matplotlib
+cartopy
+numpy
+pillow
