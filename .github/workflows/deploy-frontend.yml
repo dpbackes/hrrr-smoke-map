@@ -1,0 +1,29 @@
+name: Deploy Frontend Updates
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      # Only trigger this action if a file inside the public folder is changed
+      - 'public/**'
+
+permissions:
+  contents: write
+
+jobs:
+  deploy_frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Deploy Frontend to GitHub Pages (Preserve Data)
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          # CRITICAL: keep_files=true ensures that it does not delete the 
+          # /data/ folder that the cron job previously generated!
+          keep_files: true
+          commit_message: "Automated frontend update"
