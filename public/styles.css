@@ -68,6 +68,55 @@ header .subtitle {
     font-weight: 300;
 }
 
+#cams-panel {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    padding: 16px 24px;
+    min-width: 250px;
+}
+
+#cams-panel h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+#cams-panel .subtitle {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 300;
+}
+
+.cams-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
+    gap: 12px;
+}
+
+.stat-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.stat-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-top: 4px;
+}
+
 #controls {
     position: absolute;
     bottom: 30px;
@@ -201,4 +250,79 @@ input[type=range]::-webkit-slider-runnable-track {
 .leaflet-control-zoom-out,
 .leaflet-control-attribution {
     filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+}
+
+/* GIF UI Styles */
+#gif-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 2000;
+    cursor: crosshair;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+#gif-instruction {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    font-weight: 600;
+}
+
+#gif-selection {
+    position: absolute;
+    border: 2px dashed #fff;
+    background: rgba(255, 255, 255, 0.1);
+    pointer-events: none;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+}
+
+#gif-save-btn {
+    position: absolute;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    transform: translateX(-50%);
+    transition: transform 0.2s;
+}
+
+#gif-save-btn:hover {
+    transform: translateX(-50%) scale(1.05);
+}
+
+#gif-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3000;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+    text-align: center;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    margin-top: 20px;
+    overflow: hidden;
+}
+
+#gif-progress {
+    width: 0%;
+    height: 100%;
+    background: var(--accent-color);
+    transition: width 0.3s;
 }

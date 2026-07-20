@@ -12,7 +12,7 @@ def main():
     # We will fetch the latest run
     # 'sfc' for surface fields, although smoke might be in different files depending on the version.
     # We'll grab the last available 12z run as an example, but Herbie can find the latest.
-    print("Finding the most recent complete HRRR run (up to F12)...")
+    print("Finding the most recent 48-hour extended HRRR run (00z, 06z, 12z, 18z)...")
     from herbie import HerbieLatest, Herbie
     from datetime import datetime, timedelta
     
@@ -21,13 +21,16 @@ def main():
         H_latest = HerbieLatest(model='hrrr', product='sfc', fxx=0)
         check_date = H_latest.date
         
-        # Look back up to 12 hours to find a run that has finished uploading F12
-        for i in range(12):
+        # Look back up to 24 hours to find an extended run that has finished F48
+        for i in range(24):
             test_date = check_date - timedelta(hours=i)
-            print(f"Checking run {test_date} for completeness...")
+            # Only these hours produce a 48-hour forecast
+            if test_date.hour not in [0, 6, 12, 18]:
+                continue
+                
+            print(f"Checking extended run {test_date} for completeness (F48)...")
             try:
-                H_test = Herbie(test_date, model='hrrr', product='sfc', fxx=12)
-                # If we can fetch the inventory, the file exists on AWS
+                H_test = Herbie(test_date, model='hrrr', product='sfc', fxx=48)
                 if len(H_test.inventory()) > 0:
                     H = Herbie(test_date, model='hrrr', product='sfc', fxx=0)
                     break
@@ -49,8 +52,8 @@ def main():
         "bounds": [[24.0, -125.0], [50.0, -65.0]] 
     }
 
-    # Fetch forecast hours 0 to 12
-    for fxx in range(13):
+    # Fetch forecast hours 0 to 48
+    for fxx in range(49):
         print(f"Processing forecast hour f{fxx:02d}...")
         
         # Retry logic for network timeouts
