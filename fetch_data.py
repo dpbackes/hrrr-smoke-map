@@ -70,7 +70,7 @@ def main():
     metadata = {
         "run_time": H_recent.date.strftime('%Y-%m-%d %H:%M:%S UTC'),
         "forecasts": [],
-        "bounds": [[24.0, -125.0], [50.0, -65.0]] 
+        "bounds": [[20.0, -135.0], [55.0, -60.0]] 
     }
 
     # Fetch seamlessly
@@ -132,9 +132,10 @@ def main():
             cmap = mcolors.ListedColormap(colors)
             norm = mcolors.BoundaryNorm(bounds, cmap.N)
 
-            fig = plt.figure(figsize=(10, 6), frameon=False)
-            ax = plt.axes(projection=ccrs.PlateCarree())
-            ax.set_extent([-125, -65, 24, 50], crs=ccrs.PlateCarree())
+            fig = plt.figure(figsize=(12, 7), frameon=False)
+            # Use Mercator to match Leaflet's Web Mercator projection perfectly
+            ax = plt.axes(projection=ccrs.Mercator())
+            ax.set_extent([-135, -60, 20, 55], crs=ccrs.PlateCarree())
             
             pm25_masked = np.ma.masked_where(pm25 < 2.0, pm25)
             mesh = ax.pcolormesh(lons, lats, pm25_masked, 
