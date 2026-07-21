@@ -121,6 +121,11 @@ function updateUI(stepIndex) {
         currentTimeEl.textContent = formatToMadisonTime(f.valid_time);
         forecastHourEl.textContent = `F${f.fxx.toString().padStart(2, '0')}`;
         
+        // Dynamically update which model run this frame came from
+        if (f.model_run) {
+            modelRunEl.textContent = formatToMadisonTime(f.model_run);
+        }
+        
         // Sync CAMS data
         if (camsData) {
             // f.valid_time is like "2026-07-20 00:00:00 UTC"

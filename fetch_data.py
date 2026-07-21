@@ -8,72 +8,101 @@ import cartopy.crs as ccrs
 def main():
     # Setup directories
     os.makedirs('public/data', exist_ok=True)
+    output_dir = 'public/data'
     
     # We will fetch the latest run
     # 'sfc' for surface fields, although smoke might be in different files depending on the version.
     # We'll grab the last available 12z run as an example, but Herbie can find the latest.
-    print("Finding the most recent 48-hour extended HRRR run (00z, 06z, 12z, 18z)...")
+    print("Finding the most recent 18-hour HRRR run...")
     from herbie import HerbieLatest, Herbie
     from datetime import datetime, timedelta
     
-    H = None
+    H_recent = None
+    H_ext = None
     try:
         H_latest = HerbieLatest(model='hrrr', product='sfc', fxx=0)
         check_date = H_latest.date
         
-        # Look back up to 24 hours to find an extended run that has finished F48
-        for i in range(24):
+        # 1. Find the latest run that has finished F18
+        for i in range(12):
             test_date = check_date - timedelta(hours=i)
-            # Only these hours produce a 48-hour forecast
-            if test_date.hour not in [0, 6, 12, 18]:
+            print(f"Checking run {test_date} for F18 completeness...")
+            try:
+                H_test = Herbie(test_date, model='hrrr', product='sfc', fxx=18)
+                if len(H_test.inventory()) > 0:
+                    H_recent = Herbie(test_date, model='hrrr', product='sfc', fxx=0)
+                    break
+            except Exception:
                 continue
                 
-            print(f"Checking extended run {test_date} for completeness (F48)...")
+        if not H_recent:
+            print("Could not find a complete 18h run.")
+            return
+
+        # 2. Find the latest 48-hour extended run (must be <= H_recent.date)
+        for i in range(24):
+            test_date = H_recent.date - timedelta(hours=i)
+            if test_date.hour not in [0, 6, 12, 18]:
+                continue
+            print(f"Checking extended run {test_date} for F48 completeness...")
             try:
                 H_test = Herbie(test_date, model='hrrr', product='sfc', fxx=48)
                 if len(H_test.inventory()) > 0:
-                    H = Herbie(test_date, model='hrrr', product='sfc', fxx=0)
+                    H_ext = Herbie(test_date, model='hrrr', product='sfc', fxx=0)
                     break
             except Exception:
                 continue
     except Exception as e:
-        print(f"Error querying latest run: {e}")
+        print(f"Error querying latest runs: {e}")
 
-    if not H:
-        print("Could not find a recent complete HRRR run.")
+    if not H_recent or not H_ext:
+        print("Could not find complete HRRR runs.")
         return
 
-    print(f"Using complete run: {H.date}")
+    print(f"Using recent run: {H_recent.date} (for hours 0-18)")
+    print(f"Using extended run: {H_ext.date} (to fill the rest)")
+
+    # Calculate seamless valid times
+    start_time = H_recent.date
+    end_time = H_ext.date + timedelta(hours=48)
+    total_hours = int((end_time - start_time).total_seconds() / 3600) + 1
 
     metadata = {
-        "run_time": H.date.strftime('%Y-%m-%d %H:%M:%S UTC'),
+        "run_time": H_recent.date.strftime('%Y-%m-%d %H:%M:%S UTC'),
         "forecasts": [],
-        # Exact bounds matching the Cartopy plot extent for Leaflet
         "bounds": [[24.0, -125.0], [50.0, -65.0]] 
     }
 
-    # Fetch forecast hours 0 to 48
-    for fxx in range(49):
-        print(f"Processing forecast hour f{fxx:02d}...")
+    # Fetch seamlessly
+    for step in range(total_hours):
+        valid_time = start_time + timedelta(hours=step)
+        
+        # Decide which model to use
+        if valid_time <= start_time + timedelta(hours=18):
+            model_to_use = H_recent
+        else:
+            model_to_use = H_ext
+            
+        # Calculate the fxx for the chosen model
+        fxx = int((valid_time - model_to_use.date).total_seconds() / 3600)
+        
+        print(f"Processing valid time {valid_time} (using {model_to_use.date} F{fxx:02d})...")
         
         # Retry logic for network timeouts
         success = False
         for attempt in range(3):
             try:
-                # Re-initialize for specific forecast hour
-                Hf = Herbie(H.date, model='hrrr', product='sfc', fxx=fxx)
-                
-                # The variable for smoke at surface is typically 'MASSDEN'
+                Hf = Herbie(model_to_use.date, model='hrrr', product='sfc', fxx=fxx)
                 ds = Hf.xarray("MASSDEN:8 m above ground")
                 success = True
                 break
             except Exception as e:
-                print(f"Attempt {attempt+1} failed for f{fxx:02d}: {e}")
+                print(f"Attempt {attempt+1} failed: {e}")
                 import time
                 time.sleep(2)
                 
         if not success:
-            print(f"Failed to fetch f{fxx:02d} after 3 attempts, skipping...")
+            print(f"Failed to fetch data for {valid_time}, skipping...")
             continue
             
         try:
@@ -85,7 +114,6 @@ def main():
             data = ds[var_name]
 
             # Convert to numpy and plot
-            # Extract lats/lons
             lats = ds.latitude.values
             lons = ds.longitude.values
             val = data.values
@@ -96,35 +124,19 @@ def main():
             # EPA AQI Colors and PM2.5 Breakpoints
             import matplotlib.colors as mcolors
             
-            # PM2.5 Breakpoints (ug/m3) corresponding to AQI categories
-            # Good, Moderate, USG, Unhealthy, Very Unhealthy, Hazardous
             bounds = [0, 12.1, 35.5, 55.5, 150.5, 250.5, 500]
-            
-            # EPA standard colors for AQI
-            # We add an alpha channel to the hex colors to make lower values more transparent
             colors = [
-                '#00e40040',  # Green (Good) - highly transparent
-                '#ffff0090',  # Yellow (Moderate)
-                '#ff7e00d0',  # Orange (USG)
-                '#ff0000ff',  # Red (Unhealthy)
-                '#8f3f97ff',  # Purple (Very Unhealthy)
-                '#7e0023ff'   # Maroon (Hazardous)
+                '#00e40040', '#ffff0090', '#ff7e00d0', '#ff0000ff', '#8f3f97ff', '#7e0023ff'
             ]
             
             cmap = mcolors.ListedColormap(colors)
             norm = mcolors.BoundaryNorm(bounds, cmap.N)
 
-            # Plot using Cartopy for proper projection
             fig = plt.figure(figsize=(10, 6), frameon=False)
-            
-            # Use PlateCarree which Leaflet expects for ImageOverlay
             ax = plt.axes(projection=ccrs.PlateCarree())
             ax.set_extent([-125, -65, 24, 50], crs=ccrs.PlateCarree())
             
-            # Mask out values below 2 ug/m3 so the map isn't completely covered in green for background negligible smoke
             pm25_masked = np.ma.masked_where(pm25 < 2.0, pm25)
-            
-            # Plot the data using the AQI colormap and norm
             mesh = ax.pcolormesh(lons, lats, pm25_masked, 
                                transform=ccrs.PlateCarree(),
                                cmap=cmap, 
@@ -132,16 +144,19 @@ def main():
                                
             ax.axis('off')
             
-            filename = f"smoke_f{fxx:02d}.png"
-            filepath = os.path.join('public', 'data', filename)
-            
-            plt.savefig(filepath, transparent=True, bbox_inches='tight', pad_inches=0, dpi=150)
+            # Save the figure
+            img_filename = f"smoke_step{step:02d}.png"
+            img_path = os.path.join(output_dir, img_filename)
+            plt.savefig(img_path, transparent=True, bbox_inches='tight', pad_inches=0, dpi=150)
             plt.close(fig)
 
+            # Append to metadata
             metadata["forecasts"].append({
+                "step": step,
                 "fxx": fxx,
-                "image": f"data/{filename}",
-                "valid_time": (H.date + timedelta(hours=fxx)).strftime('%Y-%m-%d %H:%M:%S UTC')
+                "valid_time": valid_time.strftime('%Y-%m-%d %H:%M:%S UTC'),
+                "model_run": model_to_use.date.strftime('%Y-%m-%d %H:%M:%S UTC'),
+                "image": f"data/{img_filename}"
             })
             
         except Exception as e:
